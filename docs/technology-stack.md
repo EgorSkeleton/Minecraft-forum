@@ -18,6 +18,7 @@
 * Grafana
 ### **Инфраструктура**
 * Docker
+* Docker-compose
 ### **Тестирование**
 * Postman
 * Pytest
