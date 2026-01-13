@@ -1,0 +1,67 @@
+{% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}Редактирование - {{ form.instance.title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'main/css/dashboard.css' %}">
+
+<div class="container mt-4">
+    <div class="block-box p-4" style="background-color: #1a1a1a;">
+        <h2 class="text-warning mb-4">Редактирование статьи</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="mb-4"> <label class="form-label text-warning fw-bold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <h3 class="text-warning mt-5 mb-3">Управление изображениями</h3>
+            {{ formset.management_form }}
+            {% for iform in formset %}
+                <div class="image-management-row">
+                    {% for hidden in iform.hidden_fields %}{{ hidden }}{% endfor %}
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            {{ iform.image.label }}: {{ iform.image }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ iform.image_type.label }}: {{ iform.image_type }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ iform.alt_text.label }}: {{ iform.alt_text }}
+                        </div>
+                        {% if formset.can_delete %}
+                            <div class="col-md-2 text-danger">
+                                Удалить: {{ iform.DELETE }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-custom px-5">Сохранить изменения</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.select2-special').select2({
+            placeholder: "Выберите жанры...",
+            allowClear: true,
+            closeOnSelect: false
+            
+        });
+    });
+</script>
+{% endblock %}
+
