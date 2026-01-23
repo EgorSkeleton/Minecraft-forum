@@ -1,0 +1,117 @@
+body {
+    background-color: #1a1a1a;
+    color: #ffda00;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+a {
+    color: #ffda00;
+    text-decoration: none;
+}
+a:hover {
+    color: #88b32d;
+}
+
+header {
+    padding: 1rem;
+}
+
+.btn-custom {
+    background-color: #ffda00;
+    color: #1a1a1a;
+    border: 2px solid #88b32d;
+}
+
+.btn-custom:hover {
+    background-color: #88b32d;
+    color: #ffda00;
+    border-color: #ffda00;
+}
+
+.block-box {
+    border: 2px solid #88b32d;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
+footer {
+    margin-top: auto;
+    padding: 1rem;
+    background-color: #0d0d0d;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Стилизация offcanvas */
+.offcanvas {
+    background-color: #1a1a1a;
+    color: #ffda00;
+    border: 2px solid #88b32d;
+}
+
+.offcanvas a {
+    color: #ffda00;
+    display: block;
+    padding: 0.5rem 1rem;
+}
+
+.offcanvas a:hover {
+    color: #88b32d;
+    text-decoration: none;
+}
+
+.offcanvas-header .btn-close {
+    filter: invert(1); 
+}
+
+/* --- Цвет плейсхолдера (подсказки) --- */
+.select2-container--default .select2-selection--multiple .select2-search__field::placeholder {
+    color: rgba(255, 217, 0, 0.733) !important; 
+}
+
+/* Основное поле, где лежат выбранные элементы */
+.select2-container--default .select2-selection--multiple {
+    background-color: #121212 !important; /* Фон самого поля */
+    border: 1px solid #88b32d !important; /* Зеленая рамка в стиле сайта */
+}
+
+/* Сами выбранные «плашки» (теги) */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #88b32d !important; /* Зеленый фон плашки */
+    color: #1a1a1a !important;           /* Темный текст для контраста */
+    border: 1px solid #ffda00 !important;
+    padding: 2px 8px;
+    margin-top: 5px;
+}
+
+/* Цвет крестика удаления внутри плашки */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #ffda00 !important;
+    margin-right: 5px;
+    border-right: 1px solid rgba(255, 218, 0, 0.3) !important;
+}
+
+/* Эффект при наведении на крестик */
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background-color: #ffda00 !important;
+    color: #1a1a1a !important;
+}
+
+/* Подгоняем Select2 под твой темный стиль */
+.select2-container--default .select2-selection--multiple {
+    background-color: #121212 !important;
+    border: 1px solid #333 !important;
+}
+.select2-dropdown {
+    background-color: #1a1a1a !important;
+    color: #ffcc00 !important;
+    border: 1px solid #ffcc00 !important;
+}
+.select2-results__option--highlighted[aria-selected] {
+    background-color: #ffcc00 !important;
+    color: #000 !important;
+}
+
