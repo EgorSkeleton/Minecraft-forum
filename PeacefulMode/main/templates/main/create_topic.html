@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Создать новую тему в "{{ category.title }}"</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Опубликовать тему</button>
+    </form>
+    <br>
+    <a href="{% url 'category_detail' category.slug %}">Отмена</a>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h2>Категория: {{ category.title }}</h2>
+    <a href="{% url 'create_topic' category.slug %}">[+] Создать новую тему</a>
+    <hr>
+    <ul>
+        {% for topic in topics %}
+            <li>
+                <a href="{% url 'topic_detail' topic.slug %}">{{ topic.title }}</a> 
+                (Автор: {{ topic.author.username }})
+            </li>
+        {% empty %}
+            <li>В этой категории ещё нет тем.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'forum_index' %}">← Назад к категориям</a>
+{% endblock %}

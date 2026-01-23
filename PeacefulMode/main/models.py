@@ -1,4 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from transliterate import slugify as translit_slugify
 
 class TagOfVersion(models.Model):
     class GameEditions(models.TextChoices):
@@ -69,3 +74,66 @@ class Articles(models.Model):
     class Meta:
         verbose_name = 'Статья'
         verbose_name_plural = 'Статьи'
+
+class ForumCategory(models.Model):
+    title = models.CharField('Название категории', max_length=100)
+    description = models.TextField('Описание', blank=True)
+    slug = models.SlugField(unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = translit_slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = "Категория форума"
+        verbose_name = "Категории форума"
+
+class ForumTopic(models.Model):
+    category = models.ForeignKey(ForumCategory, on_delete=models.CASCADE, related_name='topics')
+    title = models.CharField('Заголовок темы', max_length=200)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(unique=True, blank=True)
+    is_closed = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # Если название на русском, используем транслитерацию
+            self.slug = translit_slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+class ForumPost(models.Model):
+    topic = models.ForeignKey(ForumTopic, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField('Сообщение')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Пост от {self.author} в теме {self.topic}"
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default.png', blank=True)
+    bio = models.TextField(max_length=500, blank=True, verbose_name="О себе")
+    discord_id = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"Профиль {self.user.username}"
+
+# Автоматическое создание профиля при создании пользователя
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()

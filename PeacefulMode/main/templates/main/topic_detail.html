@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{ topic.title }}</h1>
+    <p>Категория: {{ topic.category.title }}</p>
+    <hr>
+
+    {% for post in posts %}
+        <div style="border: 1px solid #333; margin-bottom: 10px; padding: 10px;">
+            <strong>{{ post.author.username }}</strong> 
+            <small>({{ post.created_at|date:"d.m.Y H:i" }})</small>
+            <p>{{ post.content }}</p>
+            
+            {% if post.author == user or user.is_staff %}
+                <form action="{% url 'delete_post' post.pk %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" onclick="return confirm('Удалить?')">Удалить</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <hr>
+    {% if user.is_authenticated %}
+        <h3>Ваш ответ:</h3>
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="content" rows="4" style="width: 100%;" required></textarea><br>
+            <button type="submit">Отправить ответ</button>
+        </form>
+    {% else %}
+        <p><a href="{% url 'account_login' %}">Войдите</a>, чтобы отвечать в темах.</p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'category_detail' topic.category.slug %}">← Назад к списку тем</a>
+{% endblock %}

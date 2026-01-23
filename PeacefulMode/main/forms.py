@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from .models import Articles, ArticleImage, TagOfGanre
+from .models import ForumTopic, ForumPost
 
 class ArticlesForm(forms.ModelForm):
     class Meta:
@@ -38,3 +39,16 @@ class ImageForm(forms.ModelForm):
 ImageFormSet = forms.inlineformset_factory(
     Articles, ArticleImage, form=ImageForm, extra=3, can_delete=True
 )
+
+class NewTopicForm(forms.ModelForm):
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 5, 'placeholder': 'Текст вашего первого сообщения...'}),
+        label="Сообщение"
+    )
+
+    class Meta:
+        model = ForumTopic
+        fields = ['title']
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'Заголовок темы'}),
+        }

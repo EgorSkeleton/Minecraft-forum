@@ -5,12 +5,53 @@
 {% block header_title %}Форум{% endblock %}
 
 {% block content %}
-<div class="block-box">
-    <h2>Темы форума</h2>
-    <ul>
-        <li><a href="#">Тема 1: Приветствие</a></li>
-        <li><a href="#">Тема 2: Django советы</a></li>
-        <li><a href="#">Тема 3: Обсуждение проекта</a></li>
-    </ul>
+<div class="container mt-4">
+    {% for category in categories %}
+    <div class="block-box mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <a href="{% url 'category_detail' category.slug %}" style="color: #ffda00; text-decoration: none;">
+                    {{ category.title }}
+                </a>
+            </h2>
+            <small style="color: #88b32d;">Категория</small>
+        </div>
+        <p class="text-muted small">{{ category.description }}</p>
+        
+        <hr style="border-color: #333;">
+
+        <ul class="list-unstyled">
+            {% for topic in category.topics.all|dictsortreversed:"created_at"|slice:":5" %}
+            <li class="mb-2 d-flex justify-content-between">
+                <a href="{% url 'topic_detail' topic.slug %}" class="topic-link">
+                    {{ topic.title }}
+                </a>
+                <span class="text-muted small">от {{ topic.author.username }}</span>
+            </li>
+            {% empty %}
+                <li class="text-muted small">В этой категории пока нет тем.</li>
+            {% endfor %}
+        </ul>
+        
+        <div class="text-end mt-2">
+            <a href="{% url 'create_topic' category.slug %}" class="btn btn-sm btn-custom">Создать тему</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="block-box">
+        <p>На форуме пока нет категорий. Добавьте их через админ-панель.</p>
+    </div>
+    {% endfor %}
 </div>
+
+<style>
+    .topic-link {
+        color: #ffffff;
+        transition: color 0.2s;
+    }
+    .topic-link:hover {
+        color: #88b32d;
+        text-decoration: underline !important;
+    }
+</style>
 {% endblock %}
