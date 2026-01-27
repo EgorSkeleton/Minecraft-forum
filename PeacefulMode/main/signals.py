@@ -21,10 +21,11 @@ def auto_delete_avatar_on_delete(sender, instance, **kwargs):
             os.remove(instance.avatar.path)
 
 @receiver(post_save, sender=User)
-def create_profile(sender, instance, created, **kwargs):
+def create_or_save_user_profile(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
-def save_profile(sender, instance, **kwargs):
-    instance.profile.save()
+        # Используем get_or_create вместо простого создания
+        Profile.objects.get_or_create(user=instance)
+    else:
+        # Если профиль уже есть, просто сохраняем его
+        if hasattr(instance, 'profile'):
+            instance.profile.save()

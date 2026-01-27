@@ -5,49 +5,43 @@
 <link rel="stylesheet" href="{% static 'main/css/dashboard.css' %}">
 
 <div class="container mt-4">
-    <div class="block-box p-4" style="background-color: #1a1a1a;">
-        <h2 class="text-warning mb-4">Создание статьи</h2>
+    <div class="block-box p-4 shadow" style="background-color: #1a1a1a; border: 1px solid #88b32d; border-radius: 10px;">
+        <h2 class="text-warning mb-4">⛏️ Создание новой статьи</h2>
         
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             
-            {% for field in form %}
-                <div class="mb-4"> <label class="form-label text-warning fw-bold">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <div class="text-danger small">{{ field.errors }}</div>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <h3 class="text-warning mt-5 mb-3">Изображения</h3>
-            {{ formset.management_form }}
-            <div id="image-formset">
-                {% for iform in formset %}
-                    <div class="image-form-row row">
-                        {% for hidden in iform.hidden_fields %}{{ hidden }}{% endfor %}
-                        <div class="col-md-4">{{ iform.image.label }}: {{ iform.image }}</div>
-                        <div class="col-md-4">{{ iform.image_type.label }}: {{ iform.image_type }}</div>
-                        <div class="col-md-4">{{ iform.alt_text.label }}: {{ iform.alt_text }}</div>
-                        {% if formset.can_delete %}
-                            <div class="mt-2 text-danger small">Удалить: {{ iform.DELETE }}</div>
+            <div class="row">
+                {% for field in form %}
+                    <div class="{% if field.name == 'full_text' or field.name == 'short_text' %}col-12{% else %}col-md-6{% endif %} mb-4">
+                        <label class="form-label text-warning fw-bold small text-uppercase">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors }}</div>
                         {% endif %}
                     </div>
                 {% endfor %}
             </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-custom px-5">Сохранить всё</button>
+            <div class="mt-4 border-top border-secondary pt-4">
+                <button type="submit" class="btn px-5 shadow-sm" 
+                        style="background-color: #ffda00; color: #1a1a1a; font-weight: bold; border: none; transition: 0.3s;"
+                        onmouseover="this.style.backgroundColor='#88b32d'; this.style.color='#fff'"
+                        onmouseout="this.style.backgroundColor='#ffda00'; this.style.color='#1a1a1a'">
+                    Опубликовать статью
+                </button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary ms-2 text-white border-secondary px-4">Отмена</a>
             </div>
         </form>
     </div>
 </div>
+
 <script>
     $(document).ready(function() {
         $('.select2-special').select2({
             placeholder: "Выберите жанры...",
             allowClear: true,
-            closeOnSelect: false
+            width: '100%'
         });
     });
 </script>

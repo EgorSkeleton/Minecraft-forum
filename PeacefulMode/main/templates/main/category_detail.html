@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'main/base.html' %}
 {% block content %}
     <h2>Категория: {{ category.title }}</h2>
     <a href="{% url 'create_topic' category.slug %}">[+] Создать новую тему</a>
@@ -13,5 +13,5 @@
             <li>В этой категории ещё нет тем.</li>
         {% endfor %}
     </ul>
-    <a href="{% url 'forum_index' %}">← Назад к категориям</a>
+    <a href="{% url 'forum' %}">← Назад к категориям</a>
 {% endblock %}

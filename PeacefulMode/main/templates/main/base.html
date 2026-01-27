@@ -36,29 +36,69 @@
         </div>
     </header>
 
-    <div class="offcanvas offcanvas-start" tabindex="-1" id="leftOffcanvas" aria-labelledby="leftOffcanvasLabel"> <!--Левое меню--> 
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="leftOffcanvasLabel">Меню</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
-      </div>
-      <div class="offcanvas-body">
-        <a href="#">Ссылка 1</a>
-        <a href="#">Ссылка 2</a>
-        <a href="#">Ссылка 3</a>
-      </div>
+    <div class="offcanvas offcanvas-start text-bg-dark" tabindex="-1" id="leftOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title text-warning">Фильтр контента</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+            <h6 class="text-warning mb-3">Жанры</h6>
+            <div class="list-group mb-4">
+              {% for g in all_genres %}
+                  <a href="?{% for old_g in selected_genres %}{% if old_g != g.ganre %}genre={{ old_g|urlencode }}&{% endif %}{% endfor %}genre={{ g.ganre|urlencode }}{% if selected_version %}&version={{ selected_version|urlencode }}{% endif %}" 
+                    class="tag-link {% if g.ganre in selected_genres %}text-warning fw-bold{% endif %}">
+                      {{ g.get_ganre_display }}
+                  </a>
+              {% endfor %}
+            </div>
+
+            <hr class="border-secondary">
+
+            <h6 class="text-warning mb-3">Редакции игры</h6>
+            <div class="d-flex flex-wrap gap-2">
+              {% for v in all_versions %}
+                  <a href="?version={{ v.edition|urlencode }}{% for old_g in selected_genres %}&genre={{ old_g|urlencode }}{% endfor %}" 
+                    class="tag-link {% if v.edition == selected_version %}text-warning fw-bold{% endif %}">
+                      {{ v.get_edition_display }}
+                  </a>
+              {% endfor %}
+            </div>
+        </div>
     </div>
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="rightOffcanvas" aria-labelledby="rightOffcanvasLabel"> <!--Правое меню-->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="rightOffcanvas" aria-labelledby="rightOffcanvasLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="rightOffcanvasLabel">Профиль</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        <h5 class="offcanvas-title" id="rightOffcanvasLabel">Меню</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
       </div>
-      <div class="offcanvas-body text-end">
-        <a href="#">Профиль</a>
-        <a href="#">Выход</a>
-        {% if user.is_staff %}
-        <a href="{% url 'article_add' %}">Добавить статью</a>
-        <a href="{% url 'dashboard' %}">Редактировать статью</a>
+
+      <div class="offcanvas-body d-flex flex-column">
+        {% if user.is_authenticated %}
+          <div class="user-sidebar-section text-end mb-4">
+            <p>Привет, <strong>{{ user.username }}</strong>!</p>
+            <form method="post" action="{% url 'account_logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-logout">Выйти</button>
+            </form>
+          </div>
+
+          <div class="nav-links text-end">
+            <a href="{% url 'profile' %}" class="menu-link">Мой профиль</a>
+            
+            {% if user.is_staff %}
+              <hr class="border-secondary">
+              <small class="text-muted d-block mb-2">Управление</small>
+              <a href="{% url 'article_add' %}" class="d-block mb-2">Добавить статью</a>
+              <a href="{% url 'dashboard' %}" class="d-block mb-2">Редактировать статью</a>
+            {% endif %}
+          </div>
+
+        {% else %}
+          <div class="auth-box text-center mt-5">
+            <p style="color: #ffda00;">Добро пожаловать!</p>
+            <a href="{% url 'account_signup' %}" class="btn-custom">Войти / Регистрация</a>
+          </div>
         {% endif %}
       </div>
     </div>

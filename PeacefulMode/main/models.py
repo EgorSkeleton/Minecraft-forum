@@ -34,20 +34,6 @@ class TagOfGanre(models.Model):
     def __str__(self):
         return self.ganre
 
-
-class ArticleImage(models.Model):
-    class ImageType(models.TextChoices):
-        LOGO = 'logo', 'Логотип'
-        SCREENSHOT = 'screenshot', 'Скриншот'
-
-    article = models.ForeignKey('Articles', on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='media/')
-    alt_text = models.CharField(max_length=100, blank=True)
-    image_type = models.CharField(max_length=20, choices=ImageType.choices, default=ImageType.SCREENSHOT)
-
-    def __str__(self):
-        return f"{self.article} - {self.image_type}"
-
 class Articles(models.Model):
     class Status(models.TextChoices):
         ABANDONED = 'abandoned', 'Заброшен'
@@ -55,6 +41,7 @@ class Articles(models.Model):
         UNKNOWN = 'unknown', 'Неизвестно'
 
     title = models.CharField('Название', max_length=50, blank=False, null=False)
+    logo = models.ImageField('Логотип сборки', upload_to='logos/', blank=True, null=True)
     author = models.CharField('Автор сборки', max_length=50, blank=True, null=True)
     date = models.DateField('Дата выхода сборки', null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.UNKNOWN, blank=False)
@@ -74,6 +61,14 @@ class Articles(models.Model):
     class Meta:
         verbose_name = 'Статья'
         verbose_name_plural = 'Статьи'
+
+class ArticleImage(models.Model):
+    # Теперь здесь только скриншоты
+    article = models.ForeignKey(Articles, on_delete=models.CASCADE, related_name='screenshots')
+    image = models.ImageField('Скриншот', upload_to='screenshots/')
+    
+    def __str__(self):
+        return f"Скриншот для {self.article.title}"
 
 class ForumCategory(models.Model):
     title = models.CharField('Название категории', max_length=100)
@@ -136,4 +131,9 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
+    # Проверяем, есть ли у пользователя профиль, прежде чем сохранять
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+    else:
+        # Если профиля почему-то нет — создаем его
+        Profile.objects.get_or_create(user=instance)

@@ -115,3 +115,209 @@ footer {
     color: #000 !important;
 }
 
+.auth-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #222;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
+}
+
+/* Цвет фона самой панели (если хочешь темную) */
+.offcanvas {
+    background-color: #1a1a1a;
+    color: white;
+}
+
+/* Ссылки в меню */
+.offcanvas-body a {
+    color: #ffcc00;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.offcanvas-body a:hover {
+    color: #88b32d; /* Желтый при наведении */
+}
+
+/* Кнопка выхода: черным по желтому */
+.btn-logout {
+    background-color: #ffda00 !important; /* Насильно ставим желтый */
+    color: #000000 !important;            /* Насильно ставим черный текст */
+    border: none !important;
+    padding: 5px 15px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-logout:hover {
+    background-color: #e6c400 !important;
+    transform: scale(1.05); /* Легкое увеличение при наведении */
+}
+
+/* Кнопка Регистрации (основная) */
+.btn-custom {
+    display: inline-block;
+    background-color: #ffda00;
+    color: #000 !important;
+    padding: 10px 20px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+.offcanvas-title {
+    color: #ffda00;
+}
+
+.user-sidebar-section {
+    color: #ffcc00;
+}
+
+/* Рамка и размер аватарки */
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover; /* Чтобы фото не сплющивалось */
+    border-radius: 50%;
+    border: 3px solid #ffda00;
+    background-color: #222;
+}
+
+/* Карточки статистики */
+.stats-card {
+    background: #1a1a1a;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+/* Обертка для аватарки с эффектом свечения */
+.avatar-wrapper {
+    display: inline-block;
+    position: relative;
+}
+
+.avatar-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 218, 0, 0.2);
+    pointer-events: none;
+}
+
+/* Контейнер для форм */
+.auth-container {
+    max-width: 450px;
+    margin: 50px auto;
+}
+
+/* Стилизация полей ввода внутри формы */
+.auth-form p {
+    margin-bottom: 20px;
+}
+
+.auth-form input {
+    width: 100%;
+    background-color: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    border-radius: 5px;
+    padding: 12px;
+    color: #fff !important;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: #ffda00 !important;
+    box-shadow: 0 0 5px rgba(255, 218, 0, 0.2);
+}
+
+/* Ссылки под формой */
+.auth-secondary-links a {
+    color: #ffda00;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.auth-secondary-links a:hover {
+    text-decoration: underline;
+}
+
+/* Заголовки */
+.auth-title {
+    color: #ffda00;
+    font-weight: bold;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+/* Оформление списка ошибок от Django */
+.errorlist {
+    color: #ff4d4d;
+    list-style: none;
+    padding: 0;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    background: rgba(255, 77, 77, 0.1);
+    border-radius: 4px;
+    padding: 10px;
+}
+
+/* Стилизация каждого поля формы */
+.auth-form p {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+/* Скрываем стандартные чекбоксы "Remember me", если они мешают */
+.auth-form input[type="checkbox"] {
+    width: auto !important;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.tag-link {
+    color: #ffda00;
+    text-decoration: none;
+    padding: 8px 0;
+    display: block;
+    transition: 0.3s;
+}
+.tag-link:hover {
+    color: #88b32d;
+    padding-left: 5px;
+}
+
+/* Стили для кнопок-тегов */
+.btn-outline-secondary {
+    border-color: #333;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-secondary:hover {
+    background: #ffda00;
+    color: #000 !important;
+    border-color: #ffda00;
+}
+
+.rounded-pill {
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Эффект свечения для выбранного тега */
+.btn-warning {
+    box-shadow: 0 0 15px rgba(255, 218, 0, 0.2);
+    border: none;
+}

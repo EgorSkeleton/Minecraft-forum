@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from allauth.account.views import LoginView, SignupView
 
 
 urlpatterns = [
@@ -13,4 +14,7 @@ urlpatterns = [
     path('forum/<slug:slug>/', views.category_detail, name='category_detail'),
     path('forum/topic/<slug:slug>/', views.topic_detail, name='topic_detail'),
     path('forum/<slug:category_slug>/new/', views.create_topic, name='create_topic'),
+    path('login/', LoginView.as_view(template_name='account/login.html'), name='account_login'),
+    path('signup/', SignupView.as_view(template_name='account/signup.html'), name='account_signup'),
+    path('profile/', views.profile_view, name='profile'),
 ]

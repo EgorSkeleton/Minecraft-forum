@@ -1,0 +1,26 @@
+{% extends "main/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="block-box shadow-lg">
+        <h2 class="auth-title">Авторизация</h2>
+        
+        <form class="auth-form" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+            
+            {{ form.as_p }} {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+
+            <button class="btn-custom w-100 mt-3" type="submit">Войти на форум</button>
+        </form>
+
+        <div class="auth-secondary-links text-center mt-4">
+            <a href="{% url 'account_reset_password' %}">Забыли пароль?</a>
+            <hr class="border-secondary">
+            <p class="text-muted">Нет аккаунта? <a href="{% url 'account_signup' %}">Регистрация</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

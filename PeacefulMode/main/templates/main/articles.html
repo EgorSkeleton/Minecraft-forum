@@ -1,16 +1,125 @@
 {% extends "main/base.html" %}
 
-{% block title %}Статьи - PeacefulMode{% endblock %}
-
-{% block header_title %}Статьи{% endblock %}
-
 {% block content %}
-<div class="block-box">
-    <h2>Последние статьи</h2>
-    <ul>
-        <li><a href="#">Статья 1</a></li>
-        <li><a href="#">Статья 2</a></li>
-        <li><a href="#">Статья 3</a></li>
-    </ul>
+<div class="container mt-4">
+    
+    <div class="filter-bar p-3 mb-4 rounded shadow-sm bg-dark border border-secondary">
+        <div class="mb-3">
+            <h6 class="text-warning small text-uppercase fw-bold mb-2">Жанры:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for g in all_genres %}
+                    <a href="?{% for old_g in selected_genres %}{% if old_g != g.ganre %}genre={{ old_g|urlencode }}&{% endif %}{% endfor %}genre={{ g.ganre|urlencode }}{% if selected_version %}&version={{ selected_version|urlencode }}{% endif %}" 
+                       class="btn btn-sm {% if g.ganre in selected_genres %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-white{% endif %} rounded-pill px-3">
+                        {{ g.get_ganre_display }}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div>
+            <h6 class="text-warning small text-uppercase fw-bold mb-2">Редакция игры:</h6>
+            <div class="d-flex flex-wrap gap-2">
+                {% for v in all_versions %}
+                    <a href="?version={{ v.edition|urlencode }}{% for old_g in selected_genres %}&genre={{ old_g|urlencode }}{% endfor %}" 
+                       class="btn btn-sm {% if v.edition == selected_version %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary text-white{% endif %} rounded-pill px-3">
+                        {{ v.get_edition_display }}
+                    </a>
+                {% endfor %}
+                
+                {% if selected_genres or selected_version %}
+                    <a href="{% url 'articles' %}" class="btn btn-sm btn-danger rounded-pill px-3">
+                        <i class="bi bi-x-lg"></i> Сбросить всё
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if active_filters %}
+        <div class="d-flex align-items-center mb-4 p-3 shadow-sm" 
+            style="background-color: #1a1a1a; border: 1px solid #88b32d; border-radius: 8px;">
+            
+            <span style="color: #88b32d; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; margin-right: 10px;">
+                Активно:
+            </span>
+            
+            <div class="d-flex flex-wrap gap-2">
+                {% for filter_name in active_filters %}
+                    <span class="badge" 
+                        style="background-color: #ffda00; color: #1a1a1a; padding: 6px 12px; font-weight: 600; border-radius: 4px;">
+                        {{ filter_name }}
+                    </span>
+                {% endfor %}
+            </div>
+
+            <a href="{% url 'articles' %}" class="ms-auto text-decoration-none" 
+            style="color: #ffda00; font-size: 0.85rem; border-bottom: 1px dashed #ffda00; transition: 0.3s;"
+            onmouseover="this.style.color='#88b32d'; this.style.borderBottomColor='#88b32d'"
+            onmouseout="this.style.color='#ffda00'; this.style.borderBottomColor='#ffda00'">
+                Сбросить всё
+            </a>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        {% for article in articles %}
+           <div class="col-md-12 mb-4">
+                <div class="block-box shadow p-4" style="background-color: #1a1a1a; border: 1px solid #333; border-radius: 10px;">
+                    
+                    <h3 style="color: #ffda00; font-weight: bold;">{{ article.title }}</h3>
+                    
+                    <p style="color: #aaaaaa; opacity: 0.9;">
+                        {{ article.short_text|default:article.full_text|truncatewords:40 }}
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                        {% for g in article.ganre_tags.all %}
+                            <span class="badge" style="border: 1px solid #ffda00; color: #ffda00; background: transparent;">
+                                {{ g.get_ganre_display }}
+                            </span>
+                        {% endfor %}
+
+                        {% if article.version_tag %}
+                            <span class="badge" style="border: 1px solid #88b32d; color: #88b32d; background: transparent;">
+                                {{ article.version_tag.get_edition_display }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <a href="#" class="btn mt-3 px-4" 
+                    style="border: 1px solid #ffda00; color: #ffda00; background: transparent; transition: 0.3s;"
+                    onmouseover="this.style.backgroundColor='#ffda00'; this.style.color='#1a1a1a'"
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ffda00'">
+                        Перейти к чтению
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center py-5">
+                <h2 class="display-1">⛏️</h2>
+                <h4 class="text-muted mt-3">Ничего не найдено...</h4>
+                <p class="text-secondary">Попробуйте изменить параметры фильтрации или сбросить их.</p>
+                <a href="{% url 'articles' %}" class="btn btn-warning mt-2">Показать все статьи</a>
+            </div>
+        {% endfor %}
+    </div>
 </div>
+
+<style>
+    /* Небольшие дополнительные стили для красоты */
+    .filter-bar {
+        background-color: #1a1a1a !important;
+    }
+    .block-box {
+        transition: transform 0.2s ease;
+        border-radius: 8px;
+    }
+    .block-box:hover {
+        transform: translateY(-3px);
+        border-color: #ffda00 !important;
+    }
+    .btn-outline-secondary {
+        border-color: #444;
+    }
+</style>
 {% endblock %}

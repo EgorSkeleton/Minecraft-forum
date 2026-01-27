@@ -1,54 +1,74 @@
 from django import forms
-from django.forms import ModelForm
-from .models import Articles, ArticleImage, TagOfGanre
-from .models import ForumTopic, ForumPost
+from .models import Articles, ForumTopic
 
 class ArticlesForm(forms.ModelForm):
+    # Поле для множественной загрузки скриншотов
+    # Мы объявляем его здесь, так как в самой модели Articles этого поля нет (оно для ArticleImage)
+    screenshots = forms.ImageField(
+        label='Скриншоты (до 10 шт.)',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control bg-dark text-warning border-secondary',
+        }),
+        required=False
+    )
+
     class Meta:
         model = Articles
-        # Перечисляем поля, которые хотим видеть в форме
-        fields = ['title', 'author', 'version', 'status', 'short_text', 'full_text', 'version_tag', 'ganre_tags']
+        # Список всех полей, которые будут в форме
+        fields = [
+            'title', 'author', 'version', 'status', 
+            'version_tag', 'ganre_tags', 'logo', 
+            'short_text', 'full_text'
+        ]
         
-        # Добавляем стили каждому полю
+        # Стилизация полей через виджеты
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary', }),
+            'title': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
             'author': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
             'version': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
             'status': forms.Select(attrs={'class': 'form-select bg-dark text-warning border-secondary'}),
+            'version_tag': forms.Select(attrs={'class': 'form-select bg-dark text-warning border-secondary'}),
+            
+            # Поле для логотипа (одиночный файл)
+            'logo': forms.FileInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
+            
             'short_text': forms.Textarea(attrs={'class': 'form-control bg-dark text-warning border-secondary', 'rows': 3}),
             'full_text': forms.Textarea(attrs={'class': 'form-control bg-dark text-warning border-secondary', 'rows': 10}),
-            'version_tag': forms.Select(attrs={'class': 'form-select bg-dark text-warning border-secondary'}),
+            
+            # Поле для тегов (использует select2-special из твоего шаблона)
             'ganre_tags': forms.SelectMultiple(attrs={
                 'class': 'form-select select2-special', 
                 'multiple': 'multiple'
             }),
         }
 
-# Форма для одного изображения
-class ImageForm(forms.ModelForm):
-    class Meta:
-        model = ArticleImage
-        fields = ['image', 'image_type', 'alt_text']
-        widgets = {
-            'image': forms.FileInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
-            'image_type': forms.Select(attrs={'class': 'form-select bg-dark text-warning border-secondary'}),
-            'alt_text': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary', 'placeholder': 'Описание фото'}),
-        }
-
-# Создаем Formset (набор форм) для картинок
-ImageFormSet = forms.inlineformset_factory(
-    Articles, ArticleImage, form=ImageForm, extra=3, can_delete=True
-)
+    def __init__(self, *args, **kwargs):
+        """
+        Метод инициализации формы. 
+        Здесь мы принудительно добавляем атрибут 'multiple' полю screenshots,
+        чтобы Django не ругался при запуске сервера.
+        """
+        super().__init__(*args, **kwargs)
+        # Этот хак позволяет загружать несколько файлов через одно поле
+        self.fields['screenshots'].widget.attrs.update({'multiple': True})
 
 class NewTopicForm(forms.ModelForm):
     content = forms.CharField(
-        widget=forms.Textarea(attrs={'rows': 5, 'placeholder': 'Текст вашего первого сообщения...'}),
-        label="Сообщение"
+        widget=forms.Textarea(attrs={
+            'class': 'form-control bg-dark text-white border-secondary', # Добавил твои стили
+            'rows': 5, 
+            'placeholder': 'Текст вашего первого сообщения...'
+        }),
+        label="Сообщение",
+        required=True
     )
 
     class Meta:
         model = ForumTopic
-        fields = ['title']
+        fields = ['title'] 
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'Заголовок темы'}),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control bg-dark text-white border-secondary', # Добавил твои стили
+                'placeholder': 'Заголовок темы'
+            }),
         }

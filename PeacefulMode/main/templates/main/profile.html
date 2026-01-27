@@ -1,0 +1,55 @@
+{% extends "main/base.html" %}
+
+{% block title %}Профиль {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="block-box text-center shadow-sm">
+                <div class="avatar-wrapper mb-3">
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="profile-avatar img-fluid">
+                    {% else %}
+                        <img src="/media/avatars/default.png" alt="Default Avatar" class="profile-avatar img-fluid">
+                    {% endif %}
+                </div>
+                <h3 class="text-warning">{{ user.username }}</h3>
+                <p class="text-muted" style="font-size: 0.9rem;">
+                    На проекте с {{ user.date_joined|date:"d.m.Y" }}
+                </p>
+                <a href="#" class="btn-logout-custom w-100 mt-2 text-center">Редактировать профиль</a>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="block-box shadow-sm mb-4">
+                <h4 class="border-bottom border-secondary pb-2 mb-3">О себе</h4>
+                <p>{% if user.profile.bio %}{{ user.profile.bio }}{% else %}Пользователь еще ничего не рассказал о себе.{% endif %}</p>
+                
+                <div class="row mt-4">
+                    <div class="col-6 col-sm-4 text-center">
+                        <div class="stats-card">
+                            <span class="d-block h3 text-warning mb-0">{{ topics_count }}</span>
+                            <small class="text-muted">Создано тем</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-4 text-center">
+                        <div class="stats-card">
+                            <span class="d-block h3 text-warning mb-0">{{ posts_count }}</span>
+                            <small class="text-muted">Сообщений</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.profile.discord_id %}
+            <div class="block-box shadow-sm">
+                <h4 class="border-bottom border-secondary pb-2 mb-3">Контакты</h4>
+                <p><strong>Discord:</strong> <span class="text-info">{{ user.profile.discord_id }}</span></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

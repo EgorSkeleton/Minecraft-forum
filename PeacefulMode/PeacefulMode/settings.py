@@ -61,13 +61,14 @@ ROOT_URLCONF = 'PeacefulMode.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.common_data',
             ],
         },
     },
@@ -144,3 +145,10 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = True
 LOGIN_REDIRECT_URL = 'home'      # Куда кидать после входа
 LOGOUT_REDIRECT_URL = 'home'     # Куда кидать после выхода
+
+LOGIN_REDIRECT_URL = 'forum' 
+
+ACCOUNT_LOGOUT_REDIRECT_URL = 'forum'
+
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_EMAIL_REQUIRED = False 
