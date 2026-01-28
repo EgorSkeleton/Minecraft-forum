@@ -1,5 +1,7 @@
 from django import forms
 from .models import Articles, ForumTopic
+from .models import Profile
+from django.contrib.auth.models import User
 
 class ArticlesForm(forms.ModelForm):
     # Поле для множественной загрузки скриншотов
@@ -71,4 +73,23 @@ class NewTopicForm(forms.ModelForm):
                 'class': 'form-control bg-dark text-white border-secondary', # Добавил твои стили
                 'placeholder': 'Заголовок темы'
             }),
+        }
+
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['avatar', 'bio'] # Добавь сюда поля, которые есть в твоей модели Profile
+        widgets = {
+            'avatar': forms.FileInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control bg-dark text-warning border-secondary', 'rows': 3, 'placeholder': 'Расскажите о себе...'}),
+        }
+
+# Если хочешь менять еще и ник/почту (модель User), добавим вторую форму
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control bg-dark text-warning border-secondary'}),
         }

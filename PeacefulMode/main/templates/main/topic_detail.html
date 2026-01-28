@@ -1,36 +1,150 @@
 {% extends 'main/base.html' %}
+{% load static %}
+
 {% block content %}
-    <h1>{{ topic.title }}</h1>
-    <p>Категория: {{ topic.category.title }}</p>
-    <hr>
+<div class="container mt-4 mb-5">
+    <nav class="mb-3">
+        <a href="{% url 'category_detail' topic.category.slug %}" class="text-secondary text-decoration-none small">
+            ← Назад в {{ topic.category.title }}
+        </a>
+    </nav>
 
-    {% for post in posts %}
-        <div style="border: 1px solid #333; margin-bottom: 10px; padding: 10px;">
-            <strong>{{ post.author.username }}</strong> 
-            <small>({{ post.created_at|date:"d.m.Y H:i" }})</small>
-            <p>{{ post.content }}</p>
-            
-            {% if post.author == user or user.is_staff %}
-                <form action="{% url 'delete_post' post.pk %}" method="post" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit" onclick="return confirm('Удалить?')">Удалить</button>
-                </form>
-            {% endif %}
+    <h1 class="text-warning mb-4 fw-bold">{{ topic.title }}</h1>
+
+    {% with first_post=posts.0 %}
+    {% if first_post %}
+    <div class="card bg-dark border-warning shadow-lg mb-5" style="border-width: 2px;">
+        <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-transparent">
+            <span class="text-warning fw-bold">👤 {{ first_post.author.username }} <small class="text-muted text-uppercase ms-2" style="font-size: 0.7rem;">Автор темы</small></span>
+            <span class="text-muted small">{{ first_post.created_at|date:"d.m.Y H:i" }}</span>
         </div>
-    {% endfor %}
+        <div class="card-body py-4">
+            <div class="post-content-main">
+                {{ first_post.content|linebreaks }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endwith %}
 
-    <hr>
-    {% if user.is_authenticated %}
-        <h3>Ваш ответ:</h3>
-        <form method="post">
-            {% csrf_token %}
-            <textarea name="content" rows="4" style="width: 100%;" required></textarea><br>
-            <button type="submit">Отправить ответ</button>
-        </form>
-    {% else %}
-        <p><a href="{% url 'account_login' %}">Войдите</a>, чтобы отвечать в темах.</p>
+    <h4 class="text-warning mb-4">💬 Обсуждение</h4>
+    
+    <div class="replies-section mb-5">
+        {% for post in posts|slice:"1:" %}
+
+            <div class="card bg-dark border-secondary mb-3 shadow-sm">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between mb-2 small border-bottom border-secondary pb-1">
+                        <span class="text-info fw-bold">{{ post.author.username }}</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="text-secondary">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+                            
+                            {% if post.author == request.user or user.is_superuser %}
+                            <form action="{% url 'delete_post' post.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-delete-small" onclick="return confirm('Удалить это сообщение?')">
+                                    &times;
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="post-content-reply">
+                        {{ post.content|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-secondary italic text-center py-3">Пока здесь нет ответов. Будьте первым!</p>
+        {% endfor %}
+    </div>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger bg-dark border-danger text-danger mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 
-    <br>
-    <a href="{% url 'category_detail' topic.category.slug %}">← Назад к списку тем</a>
+    {% if user.is_authenticated %}
+        <div class="card bg-dark border-secondary p-4 shadow">
+            <h5 class="text-warning mb-3">Оставить ответ</h5>
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea 
+                        name="content" 
+                        class="form-control bg-black text-warning border-secondary" 
+                        rows="4" 
+                        placeholder="Введите ваше сообщение..."
+                        required></textarea>
+                </div>
+                <button type="submit" class="btn-forum-action">
+                    Отправить сообщение
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <div class="alert alert-dark border-secondary text-center">
+            Чтобы оставить ответ, <a href="{% url 'account_login' %}" class="text-warning fw-bold">войдите</a> в аккаунт.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Цвет основного текста сообщения (первый пост) */
+    .post-content-main {
+        color: #ffda00; /* Желтый */
+        font-size: 1.25rem;
+        line-height: 1.6;
+    }
+
+    /* Цвет текста ответов */
+    .post-content-reply {
+        color: #ffda00; /* Желтый */
+        font-size: 1.05rem;
+    }
+
+    /* Стилизация поля ввода */
+    textarea.form-control:focus {
+        background-color: #000 !important;
+        color: #ffda00 !important;
+        border-color: #88b32d !important;
+        box-shadow: 0 0 8px rgba(136, 179, 45, 0.4);
+    }
+
+    /* Кнопка отправки */
+    .btn-forum-action {
+        background-color: #ffda00;
+        color: #1a1a1a;
+        padding: 10px 30px;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: 0.3s;
+    }
+    .btn-forum-action:hover {
+        background-color: #88b32d;
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-delete-small {
+    background: none;
+    border: none;
+    color: #ff4d4d; /* Красный цвет */
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0 5px;
+    cursor: pointer;
+    transition: 0.2s;
+    opacity: 0.6;
+}
+
+.btn-delete-small:hover {
+    opacity: 1;
+    transform: scale(1.2);
+    color: #ff0000;
+}
+</style>
 {% endblock %}

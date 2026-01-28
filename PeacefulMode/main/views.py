@@ -4,6 +4,9 @@ from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.db import transaction
 from django.contrib import messages
+from django.conf import settings
+import requests
+import time
 
 # Модели
 from .models import (
@@ -11,9 +14,60 @@ from .models import (
     ForumCategory, ForumTopic, ForumPost, Profile
 )
 # Формы
-from .forms import ArticlesForm, NewTopicForm
+from .forms import ArticlesForm, NewTopicForm, UserUpdateForm, ProfileUpdateForm
 
 # --- ГЛАВНАЯ И СТАТЬИ ---
+
+def check_content_censorship(text):
+    # .strip() на всякий случай, чтобы убрать невидимые символы из .env
+    api_token = getattr(settings, 'HF_API_TOKEN', "").strip()
+    
+    # Это единственный правильный адрес для Llama-3 на 2026 год
+    API_URL = "https://router.huggingface.co/hf-inference/v1/chat/completions"
+    
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Content-Type": "application/json"
+    }
+
+    # Строгий формат Chat Completions (OpenAI style)
+    payload = {
+        "model": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "messages": [
+            {
+                "role": "system", 
+                "content": "You are a content moderator. Respond ONLY with one word: CLEAN or TOXIC."
+            },
+            {
+                "role": "user", 
+                "content": f"Analyze this text: {text}"
+            }
+        ],
+        "max_tokens": 5,
+        "temperature": 0.1
+    }
+
+    try:
+        print(f"--- [API] Попытка проверки Llama-3: '{text[:20]}...' ---")
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=15)
+        
+        if response.status_code == 200:
+            result = response.json()
+            # Достаем ответ из вложенной структуры JSON
+            answer = result['choices'][0]['message']['content'].strip().upper()
+            print(f"--- [API SUCCESS] Вердикт Llama: {answer} ---")
+            
+            # Убираем возможные точки и лишние слова
+            clean_answer = answer.replace('.', '').replace('!', '')
+            return "TOXIC" not in clean_answer
+        
+        # Если завтра снова будет 404 или 401, мы увидим это здесь
+        print(f"--- [!] Статус: {response.status_code} | Ответ сервера: {response.text} ---")
+        return True
+
+    except Exception as e:
+        print(f"--- [!] Критическая ошибка во views.py: {e} ---")
+        return True
 
 def home(request):
     return render(request, 'main/home.html')
@@ -117,10 +171,16 @@ def topic_detail(request, slug):
     if request.method == 'POST':
         if not request.user.is_authenticated:
             return redirect('account_login')
+            
         content = request.POST.get('content')
         if content:
-            ForumPost.objects.create(topic=topic, author=request.user, content=content)
-            return redirect('topic_detail', slug=slug)
+            # ПРОВЕРКА НЕЙРОСЕТЬЮ
+            if check_content_censorship(content):
+                ForumPost.objects.create(topic=topic, author=request.user, content=content)
+                return redirect('topic_detail', slug=slug)
+            else:
+                messages.error(request, "Ваше сообщение не прошло модерацию (обнаружена токсичность или мат).")
+                # Сообщение не сохраняется, пользователь видит ошибку
 
     return render(request, 'main/topic_detail.html', {'topic': topic, 'posts': posts})
 
@@ -149,20 +209,17 @@ def create_topic(request, category_slug):
     return render(request, 'main/create_topic.html', {'form': form, 'category': category})
 
 @login_required
-def delete_post(request, pk):
-    post = get_object_or_404(ForumPost, pk=pk)
-    topic = post.topic
-    if post.author != request.user and not request.user.is_staff:
-        messages.error(request, "У вас нет прав.")
-        return redirect('topic_detail', slug=topic.slug)
-
-    first_post = topic.posts.all().order_by('created_at').first()
-    if post == first_post:
-        topic.delete()
-        return redirect('category_detail', slug=topic.category.slug)
-    else:
+def delete_post(request, post_id):
+    post = get_object_or_404(ForumPost, id=post_id)
+    
+    # Проверяем, что удаляет автор или админ
+    if post.author == request.user or request.user.is_superuser:
+        topic_slug = post.topic.slug
         post.delete()
-        return redirect('topic_detail', slug=topic.slug)
+        return redirect('topic_detail', slug=topic_slug)
+    
+    # Если прав нет, просто возвращаем назад
+    return redirect('forum')
 
 # --- ПРОФИЛЬ ---
 
@@ -177,3 +234,34 @@ def profile_view(request):
         'posts_count': posts_count,
     }
     return render(request, 'main/profile.html', context)
+
+@login_required
+def profile_edit(request):
+    if request.method == 'POST':
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        # Предполагаем, что связь Profile создается автоматически или уже существует
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            messages.success(request, f'Ваш профиль был обновлен!')
+            return redirect('profile')
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.profile)
+
+    context = {
+        'u_form': u_form,
+        'p_form': p_form
+    }
+    return render(request, 'main/profile_edit.html', context)
+
+def article_detail(request, pk):
+    # Получаем статью или 404, если её нет
+    article = get_object_or_404(Articles, pk=pk)
+    # Скриншоты достаются через related_name='screenshots', который мы указывали в модели
+    return render(request, 'main/article_detail.html', {
+        'article': article,
+    })
+

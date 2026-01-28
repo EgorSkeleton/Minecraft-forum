@@ -321,3 +321,43 @@ footer {
     box-shadow: 0 0 15px rgba(255, 218, 0, 0.2);
     border: none;
 }
+
+/* Общие стили для кнопок форума */
+.forum-btn {
+    padding: 12px 25px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 0.3s all;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Кнопка "Создать тему" и "Отправить" */
+.btn-main-yellow {
+    background-color: #ffda00;
+    color: #1a1a1a;
+    border: none;
+}
+.btn-main-yellow:hover {
+    background-color: #88b32d;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 218, 0, 0.3);
+}
+
+/* Ссылки на темы в списке */
+.topic-link {
+    color: #ffda00;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+}
+.topic-link:hover {
+    background-color: rgba(255, 218, 0, 0.1);
+    color: #fff;
+}

@@ -7,50 +7,100 @@
 {% block content %}
 <div class="container mt-4">
     {% for category in categories %}
-    <div class="block-box mb-4">
-        <div class="d-flex justify-content-between align-items-center">
+    <div class="block-box mb-5 shadow-lg" style="border-left: 5px solid #ffda00; background-color: #1a1a1a; padding: 25px; border-radius: 12px;">
+        <div class="d-flex justify-content-between align-items-center mb-2">
             <h2 class="mb-0">
-                <a href="{% url 'category_detail' category.slug %}" style="color: #ffda00; text-decoration: none;">
+                <a href="{% url 'category_detail' category.slug %}" class="category-header-link">
                     {{ category.title }}
                 </a>
             </h2>
         </div>
-        <p class="text-muted small">{{ category.description }}</p>
+        <p class="text-secondary small mb-4" style="opacity: 0.8;">{{ category.description }}</p>
         
-        <hr style="border-color: #333;">
-
-        <ul class="list-unstyled">
+        <div class="list-group list-group-flush shadow-sm">
             {% for topic in category.topics.all|dictsortreversed:"created_at"|slice:":5" %}
-            <li class="mb-2 d-flex justify-content-between">
-                <a href="{% url 'topic_detail' topic.slug %}" class="topic-link">
-                    {{ topic.title }}
+                <a href="{% url 'topic_detail' topic.slug %}" 
+                   class="list-group-item list-group-item-action bg-transparent border-secondary d-flex justify-content-between align-items-center py-3 topic-row">
+                    <div>
+                        <span class="topic-title">{{ topic.title }}</span>
+                        <div class="text-muted small mt-1 d-md-none">от {{ topic.author.username }}</div>
+                    </div>
+                    <span class="text-muted small d-none d-md-inline">👤 {{ topic.author.username }}</span>
                 </a>
-                <span class="text-muted small">от {{ topic.author.username }}</span>
-            </li>
             {% empty %}
-                <li class="text-muted small">В этой категории пока нет тем.</li>
+                <div class="list-group-item bg-transparent text-muted small border-secondary italic">
+                    В этой категории пока нет тем.
+                </div>
             {% endfor %}
-        </ul>
+        </div>
         
-        <div class="text-end mt-2">
-            <a href="{% url 'create_topic' category.slug %}" class="btn btn-sm btn-custom">Создать тему</a>
+        <div class="text-end mt-4">
+            <a href="{% url 'create_topic' category.slug %}" class="btn-forum-action">
+                <span>➕ Создать тему</span>
+            </a>
         </div>
     </div>
     {% empty %}
-    <div class="block-box">
-        <p>На форуме пока нет категорий. Добавьте их через админ-панель.</p>
+    <div class="block-box p-5 text-center shadow">
+        <h3 class="text-muted">На форуме пока нет категорий.</h3>
+        <p class="text-secondary">Добавьте их через админ-панель для начала общения.</p>
     </div>
     {% endfor %}
 </div>
 
 <style>
-    .topic-link {
-        color: #ffffff;
-        transition: color 0.2s;
+    /* Ссылка заголовка категории */
+    .category-header-link {
+        color: #ffda00; 
+        text-decoration: none; 
+        transition: 0.3s;
+        font-weight: bold;
     }
-    .topic-link:hover {
+    .category-header-link:hover {
         color: #88b32d;
-        text-decoration: underline !important;
+    }
+
+    /* Ряды тем */
+    .topic-row {
+        color: #ffffff !important;
+        transition: all 0.2s ease;
+        border-left: 2px solid transparent !important;
+    }
+    .topic-row:hover {
+        background-color: rgba(255, 218, 0, 0.05) !important;
+        border-left: 2px solid #88b32d !important;
+        padding-left: 20px !important; /* Небольшой сдвиг при наведении */
+    }
+    .topic-title {
+        font-size: 1.15rem;
+        font-weight: 500;
+        color: #ffda00;
+    }
+
+    /* Массивная кнопка действия */
+    .btn-forum-action {
+        display: inline-block;
+        padding: 12px 28px;
+        background-color: #ffda00;
+        color: #1a1a1a !important;
+        text-decoration: none !important;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 8px;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    .btn-forum-action:hover {
+        background-color: #88b32d;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(136, 179, 45, 0.4);
+    }
+
+    /* Стилизация разделителей в списке */
+    .list-group-item {
+        border-color: rgba(255, 255, 255, 0.1) !important;
     }
 </style>
 {% endblock %}

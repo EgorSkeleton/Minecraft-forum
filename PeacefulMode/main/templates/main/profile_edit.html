@@ -1,0 +1,32 @@
+{% extends "main/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card bg-dark text-warning border-secondary shadow-lg">
+                <div class="card-header border-secondary">
+                    <h3 class="mb-0">⚙️ Настройки профиля</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <h5 class="text-white mb-3">Основная информация</h5>
+                        {{ u_form.as_p }}
+                        
+                        <hr class="border-secondary">
+                        
+                        <h5 class="text-white mb-3">Оформление</h5>
+                        {{ p_form.as_p }}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning fw-bold px-4">Сохранить изменения</button>
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary text-white ms-2">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

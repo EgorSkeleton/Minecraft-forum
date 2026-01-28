@@ -51,7 +51,7 @@
                     </span>
                 {% endfor %}
             </div>
-
+            
             <a href="{% url 'articles' %}" class="ms-auto text-decoration-none" 
             style="color: #ffda00; font-size: 0.85rem; border-bottom: 1px dashed #ffda00; transition: 0.3s;"
             onmouseover="this.style.color='#88b32d'; this.style.borderBottomColor='#88b32d'"
@@ -85,13 +85,10 @@
                             </span>
                         {% endif %}
                     </div>
-
-                    <a href="#" class="btn mt-3 px-4" 
-                    style="border: 1px solid #ffda00; color: #ffda00; background: transparent; transition: 0.3s;"
+                    <br>
+                    <a href="{% url 'article_detail' article.pk %}" class="btn btn-warning" style="border: 1px solid #ffda00; color: #ffda00; background: transparent; transition: 0.3s;"
                     onmouseover="this.style.backgroundColor='#ffda00'; this.style.color='#1a1a1a'"
-                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ffda00'">
-                        Перейти к чтению
-                    </a>
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.color='#ffda00'">Перейти к чтению</a>
                 </div>
             </div>
         {% empty %}

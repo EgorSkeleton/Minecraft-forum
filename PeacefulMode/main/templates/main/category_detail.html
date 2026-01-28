@@ -1,17 +1,115 @@
 {% extends 'main/base.html' %}
+{% load static %}
+
+{% block title %}{{ category.title }} - Форум{% endblock %}
+
 {% block content %}
-    <h2>Категория: {{ category.title }}</h2>
-    <a href="{% url 'create_topic' category.slug %}">[+] Создать новую тему</a>
-    <hr>
-    <ul>
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <a href="{% url 'forum' %}" class="text-secondary text-decoration-none small">
+            ← Назад к списку категорий
+        </a>
+    </nav>
+
+    <div class="block-box mb-4 shadow-sm" style="border-bottom: 3px solid #88b32d; background-color: #1a1a1a; padding: 20px; border-radius: 10px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="text-warning mb-1" style="font-weight: 800;">📂 {{ category.title }}</h1>
+                <p class="text-secondary mb-0">{{ category.description }}</p>
+            </div>
+            <a href="{% url 'create_topic' category.slug %}" class="btn-forum-action">
+                <span>➕ Новая тема</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="list-group shadow">
         {% for topic in topics %}
-            <li>
-                <a href="{% url 'topic_detail' topic.slug %}">{{ topic.title }}</a> 
-                (Автор: {{ topic.author.username }})
-            </li>
+            <a href="{% url 'topic_detail' topic.slug %}" 
+               class="list-group-item list-group-item-action bg-dark border-secondary mb-2 py-3 topic-item-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <div class="topic-icon me-3">
+                            <span class="fs-4">📝</span>
+                        </div>
+                        <div>
+                            <h5 class="mb-1 text-white topic-title-text">{{ topic.title }}</h5>
+                            <div class="text-muted small">
+                                <span>👤 {{ topic.author.username }}</span>
+                                <span class="mx-2">•</span>
+                                <span>📅 {{ topic.created_at|date:"d.m.Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-none d-md-block text-end">
+                        <span class="badge rounded-pill border border-secondary text-secondary">Перейти →</span>
+                    </div>
+                </div>
+            </a>
         {% empty %}
-            <li>В этой категории ещё нет тем.</li>
+            <div class="text-center py-5 bg-dark border border-secondary rounded shadow-sm">
+                <p class="text-secondary mb-0">В этой категории ещё нет тем. Будьте первым, кто начнет обсуждение!</p>
+            </div>
         {% endfor %}
-    </ul>
-    <a href="{% url 'forum' %}">← Назад к категориям</a>
+    </div>
+</div>
+
+<style>
+    /* Карточка темы */
+    .topic-item-card {
+        border-radius: 8px !important;
+        border-left: 3px solid transparent !important;
+        transition: all 0.25s ease;
+    }
+
+    .topic-item-card:hover {
+        background-color: #242424 !important;
+        border-left: 3px solid #ffda00 !important;
+        transform: translateX(5px);
+    }
+
+    .topic-title-text {
+        transition: color 0.2s;
+    }
+
+    .topic-item-card:hover .topic-title-text {
+        color: #ffda00 !important;
+    }
+
+    /* Иконка темы */
+    .topic-icon {
+        width: 45px;
+        height: 45px;
+        background: #121212;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        border: 1px solid #333;
+    }
+
+    /* Кнопка создания темы (стиль как в forum.html) */
+    .btn-forum-action {
+        display: inline-block;
+        padding: 10px 24px;
+        background-color: #ffda00;
+        color: #1a1a1a !important;
+        text-decoration: none !important;
+        font-weight: bold;
+        text-transform: uppercase;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .btn-forum-action:hover {
+        background-color: #88b32d;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+    }
+
+    /* Кастомная разметка для пустых элементов */
+    .italic { font-style: italic; }
+</style>
 {% endblock %}
