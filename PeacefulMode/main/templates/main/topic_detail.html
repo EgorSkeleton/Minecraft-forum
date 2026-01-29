@@ -13,7 +13,7 @@
 
     {% with first_post=posts.0 %}
     {% if first_post %}
-    <div class="card bg-dark border-warning shadow-lg mb-5" style="border-width: 2px;">
+    <div class="card bg-dark border-warning shadow-lg mb-4" style="border-width: 2px;">
         <div class="card-header border-secondary d-flex justify-content-between align-items-center bg-transparent">
             <span class="text-warning fw-bold">👤 {{ first_post.author.username }} <small class="text-muted text-uppercase ms-2" style="font-size: 0.7rem;">Автор темы</small></span>
             <span class="text-muted small">{{ first_post.created_at|date:"d.m.Y H:i" }}</span>
@@ -27,47 +27,16 @@
     {% endif %}
     {% endwith %}
 
-    <h4 class="text-warning mb-4">💬 Обсуждение</h4>
-    
-    <div class="replies-section mb-5">
-        {% for post in posts|slice:"1:" %}
-
-            <div class="card bg-dark border-secondary mb-3 shadow-sm">
-                <div class="card-body p-3">
-                    <div class="d-flex justify-content-between mb-2 small border-bottom border-secondary pb-1">
-                        <span class="text-info fw-bold">{{ post.author.username }}</span>
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="text-secondary">{{ post.created_at|date:"d.m.Y H:i" }}</span>
-                            
-                            {% if post.author == request.user or user.is_superuser %}
-                            <form action="{% url 'delete_post' post.id %}" method="post" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-delete-small" onclick="return confirm('Удалить это сообщение?')">
-                                    &times;
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="post-content-reply">
-                        {{ post.content|linebreaks }}
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <p class="text-secondary italic text-center py-3">Пока здесь нет ответов. Будьте первым!</p>
-        {% endfor %}
-    </div>
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-danger bg-dark border-danger text-danger mb-3">
-                {{ message }}
+            <div class="alert alert-danger bg-dark border-danger text-danger mb-4 shadow-sm">
+                <strong>Модерация:</strong> {{ message }}
             </div>
         {% endfor %}
     {% endif %}
 
     {% if user.is_authenticated %}
-        <div class="card bg-dark border-secondary p-4 shadow">
+        <div class="card bg-dark border-secondary p-4 shadow mb-5">
             <h5 class="text-warning mb-3">Оставить ответ</h5>
             <form method="post">
                 {% csrf_token %}
@@ -85,27 +54,68 @@
             </form>
         </div>
     {% else %}
-        <div class="alert alert-dark border-secondary text-center">
+        <div class="alert alert-dark border-secondary text-center mb-5">
             Чтобы оставить ответ, <a href="{% url 'account_login' %}" class="text-warning fw-bold">войдите</a> в аккаунт.
         </div>
     {% endif %}
+
+    <hr class="border-secondary mb-5">
+
+    <h4 class="text-warning mb-4">💬 Обсуждение</h4>
+    
+    <div class="replies-section mb-5">
+        {% comment %} 
+            Отсекаем первый пост автора и сортируем оставшиеся комментарии по дате (новые сверху)
+        {% endcomment %}
+        {% with replies=posts|slice:"1:" %}
+            {% for post in replies|dictsortreversed:"created_at" %}
+                <div class="card bg-dark border-secondary mb-3 shadow-sm">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between mb-2 small border-bottom border-secondary pb-1">
+                            <span class="text-info fw-bold">{{ post.author.username }}</span>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="text-secondary">{{ post.created_at|date:"d.m.Y H:i" }}</span>
+                                
+                                {% if post.author == request.user or user.is_superuser %}
+                                <form action="{% url 'delete_post' post.id %}" method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete-small" onclick="return confirm('Удалить это сообщение?')">
+                                        &times;
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="post-content-reply">
+                            {{ post.content|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-secondary italic text-center py-3">Пока здесь нет ответов. Будьте первым!</p>
+            {% endfor %}
+        {% endwith %}
+    </div>
 </div>
 
 <style>
-    /* Цвет основного текста сообщения (первый пост) */
+    /* Основной текст темы */
     .post-content-main {
-        color: #ffda00; /* Желтый */
+        color: #ffda00;
         font-size: 1.25rem;
         line-height: 1.6;
     }
 
-    /* Цвет текста ответов */
+    /* Текст комментариев */
     .post-content-reply {
-        color: #ffda00; /* Желтый */
+        color: #ffda00;
         font-size: 1.05rem;
     }
 
-    /* Стилизация поля ввода */
+    /* Поле ввода */
+    textarea.form-control {
+        resize: none;
+    }
     textarea.form-control:focus {
         background-color: #000 !important;
         color: #ffda00 !important;
@@ -113,7 +123,7 @@
         box-shadow: 0 0 8px rgba(136, 179, 45, 0.4);
     }
 
-    /* Кнопка отправки */
+    /* Кнопка */
     .btn-forum-action {
         background-color: #ffda00;
         color: #1a1a1a;
@@ -129,22 +139,23 @@
         color: white;
         transform: translateY(-2px);
     }
-    .btn-delete-small {
-    background: none;
-    border: none;
-    color: #ff4d4d; /* Красный цвет */
-    font-size: 1.2rem;
-    line-height: 1;
-    padding: 0 5px;
-    cursor: pointer;
-    transition: 0.2s;
-    opacity: 0.6;
-}
 
-.btn-delete-small:hover {
-    opacity: 1;
-    transform: scale(1.2);
-    color: #ff0000;
-}
+    /* Удаление */
+    .btn-delete-small {
+        background: none;
+        border: none;
+        color: #ff4d4d;
+        font-size: 1.2rem;
+        line-height: 1;
+        padding: 0 5px;
+        cursor: pointer;
+        transition: 0.2s;
+        opacity: 0.6;
+    }
+    .btn-delete-small:hover {
+        opacity: 1;
+        transform: scale(1.2);
+        color: #ff0000;
+    }
 </style>
 {% endblock %}

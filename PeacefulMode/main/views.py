@@ -19,54 +19,56 @@ from .forms import ArticlesForm, NewTopicForm, UserUpdateForm, ProfileUpdateForm
 # --- ГЛАВНАЯ И СТАТЬИ ---
 
 def check_content_censorship(text):
-    # .strip() на всякий случай, чтобы убрать невидимые символы из .env
+    """
+    Чистая нейросетевая модерация через RuBERT без жестких списков.
+    """
     api_token = getattr(settings, 'HF_API_TOKEN', "").strip()
     
-    # Это единственный правильный адрес для Llama-3 на 2026 год
-    API_URL = "https://router.huggingface.co/hf-inference/v1/chat/completions"
+    # Актуальный адрес роутера для классификации
+    API_URL = "https://router.huggingface.co/hf-inference/models/cointegrated/rubert-tiny-toxicity"
     
     headers = {
         "Authorization": f"Bearer {api_token}",
         "Content-Type": "application/json"
     }
 
-    # Строгий формат Chat Completions (OpenAI style)
     payload = {
-        "model": "meta-llama/Meta-Llama-3-8B-Instruct",
-        "messages": [
-            {
-                "role": "system", 
-                "content": "You are a content moderator. Respond ONLY with one word: CLEAN or TOXIC."
-            },
-            {
-                "role": "user", 
-                "content": f"Analyze this text: {text}"
-            }
-        ],
-        "max_tokens": 5,
-        "temperature": 0.1
+        "inputs": text,
+        "options": {"wait_for_model": True}
     }
 
     try:
-        print(f"--- [API] Попытка проверки Llama-3: '{text[:20]}...' ---")
-        response = requests.post(API_URL, headers=headers, json=payload, timeout=15)
+        print(f"--- [API] Анализ текста: '{text[:30]}...' ---")
+        response = requests.post(API_URL, headers=headers, json=payload, timeout=10)
         
         if response.status_code == 200:
             result = response.json()
-            # Достаем ответ из вложенной структуры JSON
-            answer = result['choices'][0]['message']['content'].strip().upper()
-            print(f"--- [API SUCCESS] Вердикт Llama: {answer} ---")
             
-            # Убираем возможные точки и лишние слова
-            clean_answer = answer.replace('.', '').replace('!', '')
-            return "TOXIC" not in clean_answer
-        
-        # Если завтра снова будет 404 или 401, мы увидим это здесь
-        print(f"--- [!] Статус: {response.status_code} | Ответ сервера: {response.text} ---")
+            if isinstance(result, list) and len(result) > 0:
+                predictions = result[0]
+                
+                # Находим метку с самым высоким весом
+                top_prediction = max(predictions, key=lambda x: x['score'])
+                label = top_prediction['label'].lower()
+                score = top_prediction['score']
+                
+                print(f"--- [API SUCCESS] Вердикт: {label} (Уверенность: {score:.2f}) ---")
+
+                # ЛОГИКА: Разрешаем публикацию ТОЛЬКО если главная метка 'non-toxic'
+                # Если модель выбрала 'insult', 'toxic', 'threat' и т.д. как основные — блокируем.
+                if label == 'non-toxic':
+                    return True
+                
+                # Если мы здесь, значит главная метка — что-то плохое
+                return False
+            
+            return True # Пропускаем, если формат ответа неожиданный
+
+        print(f"--- [!] Ошибка API ({response.status_code}): {response.text} ---")
         return True
 
     except Exception as e:
-        print(f"--- [!] Критическая ошибка во views.py: {e} ---")
+        print(f"--- [!] Ошибка связи: {e} ---")
         return True
 
 def home(request):
@@ -166,7 +168,8 @@ def category_detail(request, slug):
 
 def topic_detail(request, slug):
     topic = get_object_or_404(ForumTopic, slug=slug)
-    posts = topic.posts.all().order_by('created_at')
+    first_post = topic.posts.all().order_by('created_at').first()
+    replies = topic.posts.exclude(id=first_post.id).order_by('-created_at')
     
     if request.method == 'POST':
         if not request.user.is_authenticated:
@@ -182,7 +185,12 @@ def topic_detail(request, slug):
                 messages.error(request, "Ваше сообщение не прошло модерацию (обнаружена токсичность или мат).")
                 # Сообщение не сохраняется, пользователь видит ошибку
 
-    return render(request, 'main/topic_detail.html', {'topic': topic, 'posts': posts})
+    return render(request, 'main/topic_detail.html', {
+        'topic': topic,
+        'first_post': first_post, # Передаем отдельно
+        'replies': replies,       # Передаем отдельно
+        'posts': topic.posts.all() # Оставляем для совместимости, если нужно
+    })
 
 @login_required
 def create_topic(request, category_slug):
